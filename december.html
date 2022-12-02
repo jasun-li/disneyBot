@@ -1,0 +1,640 @@
+<html lang="en"><head class="at-element-marker"><style>body {transition: opacity ease-in 0.2s; } 
+    body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relative; } 
+    </style>
+        <meta charset="utf-8">
+        <title>Theme Park Reservation Availability</title>
+        <base href="/availability-calendar/">
+    
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" type="image/x-icon" href="favicon.ico">
+        <script type="text/javascript" async="" src="https://cdn.resonate.com/analytics.js/v1/101050566/analytics.min.js"></script><script async="" src="//sc-static.net/scevent.min.js"></script><script async="" src="//static.ads-twitter.com/uwt.js"></script><script type="text/javascript" async="" src="https://www.googletagmanager.com/gtag/destination?id=DC-8941785&amp;l=dataLayer&amp;cx=c"></script><script id="s-yimg_com-wi-ytc" src="https://s.yimg.com/wi/ytc.js" async=""></script><script src="//bat.bing.com/bat.js" async=""></script><script type="text/javascript" async="" src="https://www.google-analytics.com/analytics.js"></script><script type="text/javascript" async="" src="https://www.googletagmanager.com/gtag/js?id=UA-99867646-1&amp;l=dataLayer&amp;cx=c"></script><script type="text/javascript" async="" src="https://www.googletagmanager.com/gtag/js?id=AW-1070398022&amp;l=dataLayer&amp;cx=c"></script><script>
+            if(!(/MSIE \d|Trident.*rv:/.test(navigator.userAgent))) {
+                document.write('\x3Cscript src="https://go4.disney.go.com/">\x3C/script>');
+           }
+        </script><script src="https://go4.disney.go.com/"></script><script src="//assets.adobedtm.com/1b439b897261/cf8988e8df92/launch-7e921cca7902.min.js" data-injected-by="go4"></script><script>_satellite["_runScript1"](function(event, target, Promise) {
+    var script = document.createElement('script');
+    script.async = true;
+    script.src = '//www.googletagmanager.com/gtag/js?id=DC-2789293';
+    document.head.appendChild(script);
+    
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function (){dataLayer.push(arguments);};
+    window.gtag('js', new Date());
+    window.gtag('config', 'DC-2789293');
+    window.gtag('config', 'AW-1070398022');
+    });</script><script async="" src="//www.googletagmanager.com/gtag/js?id=DC-2789293"></script><script>_satellite["_runScript2"](function(event, target, Promise) {
+    window.WDPRO = window.WDPRO || {};
+    WDPRO.Analytics = WDPRO.Analytics || {};
+    WDPRO.Analytics.additionalModelData = WDPRO.Analytics.additionalModelData || [];
+    
+    WDPRO.Analytics.additionalModelData.push({
+      configuration: {
+        SiteCatalyst: {
+          reportSuiteId: 'wdgwdprodlr'
+        }
+      }
+    });
+    });</script><script>_satellite["_runScript3"](function(event, target, Promise) {
+    /* global _satellite */
+    var WDPRO = window.WDPRO = window.WDPRO || {},
+        A = WDPRO.Analytics = WDPRO.Analytics || {},
+        Handlers = A.Handlers = A.Handlers || [],
+        waitFor = _satellite.getVar('waitFor'),
+        F,
+        $,
+        cookie = cookieUtil(),
+        vars = {},
+        VISITOR = 'visitor',
+        SEARCH = 'search',
+        CART = 'cart',
+        CONVERSION = 'conversion',
+        resortCategories = ['deluxe-villa', 'value', 'deluxe', 'moderate', 'campground', 'other-select-deluxe-hotels'],
+        resorts = {
+            GBLDH: {name: 'Disneyland Hotel', category: 'deluxe'},
+            FALCH: {name: 'Disney\'s Grand Californian Hotel & Spa', category: 'deluxe'},
+            EGLPH: {name: 'Disney\'s Paradise Pier Hotel', category: 'deluxe'}
+        },
+        tagIdMap = obj(
+            SEARCH, 31531,
+            CART, 31533,
+            CONVERSION, 31535,
+            VISITOR, 27177
+        ),
+        lastTagType = VISITOR,
+        fireBKTag = preFireBKTag,
+        bkQueue = [],
+        addVendor = once(addVendorPrereqs);
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('readystatechange', addVendor);
+    } else {
+        addVendor();
+    }
+    
+    function addVendorPrereqs() {
+        var s = document.createElement('script');
+    
+        document.body.insertAdjacentHTML('beforeend', '<iframe name="__bkframe" height="0" width="0" frameborder="0" style="display:none;position:absolute;clip:rect(0px 0px 0px 0px)" src="about:blank"></iframe>');
+        s.setAttribute('src', 'https://tags.bkrtx.com/js/bk-coretag.js');
+        document.body.appendChild(s);
+        afterPrereqs();
+    }
+    
+    function afterPrereqs() {
+        waitFor({
+            location: ['bk_addPageCtx', 'bk_doJSTag'],
+            callback: function () {
+                fireBKTag = postFireBKTag;
+                if (bkQueue.length > 0) {
+                    bkQueue.forEach(function (args) {
+                        fireBKTag.apply(null, args);
+                    });
+                    bkQueue.length = 0;
+                }
+            }
+        });
+    }
+    
+    Handlers.push(
+        {events: 'parseModelComplete.framework', handler: process},
+        {events: 'siteCatalystCallComplete', handler: wishlistAdd}
+    );
+    
+    waitFor({
+        location: 'lpTag.events.bind',
+        callback: function (bind) {
+            // Interesting LP Events: LP_INV_SHOWN, LP_INV_ACCEPT, LP_INV_DECLINE, LP_INV_TIMEOUT, LP_DYNBUTTON_CLICKED
+            bind({
+                eventName: 'LP_DYNBUTTON_CLICKED',
+                func: function () {
+                    fireBKTag({eventType: 'chat', eventSubType: getPageType() === CART ? 'inCart' : 'outCart'});
+                }
+            });
+        },
+        timeout: 45000,
+        interval: 1000
+    });
+    
+    if (/^\/dining\//.test(location.pathname)) {
+        waitFor({
+            location: [
+                'WDPRO.Analytics.wdwQuery',
+                document.querySelector.bind(document, '#diningReservationFormContainer #searchButton')
+            ],
+            callback: function (wdwQuery, searchButton) {
+                $ = wdwQuery;
+                $(searchButton).on('click', function () {
+                    var facetStr = location.hash.replace(/^#\/|\/$/g, '');
+                    if (facetStr) {
+                        fireBKTag({facet: facetStr.replace(/,/g, '|')}, SEARCH);
+                    }
+                });
+            },
+            timeout: 40000,
+            interval: 500
+        });
+    }
+    
+    function wishlistAdd(e, data) {
+        var wishlistType;
+        if (data.trackingType === 'trackClick' && strContains(ref('dataSent.prop9', data), 'WishlistAdd')) {
+            if (strContains(data.dataSent.prop9, '_Attraction_')) {
+                wishlistType = 'attraction';
+            } else if (strContains(data.dataSent.prop9, '_resort_')) {
+                wishlistType = 'hotel';
+            } else if (strContains(data.dataSent.prop9, '_restaurant_')) {
+                wishlistType = 'dining';
+            }
+            if (wishlistType) {
+                fireBKTag({eventType: 'wishlist', eventSubType: wishlistType});
+            }
+        }
+    }
+    
+    function process(e, sam) {
+        if (!ref('configuration.SiteCatalyst', sam)) return;
+        var pageType = getPageType(sam),
+            pageMap = obj(
+                SEARCH, searchTag,
+                CART, cartTag,
+                CONVERSION, conversionTag,
+                VISITOR, visitorTag
+            );
+        $ = ref('WDPRO.Analytics.wdwQuery');
+        addCommonVars(vars, sam);
+        pageMap[pageType](vars, sam);
+    }
+    
+    function getSAM() {
+        if ((F = A.Framework) && Array.isArray(F.analyticsModel) && F.analyticsModel.length > 0) {
+            return F.analyticsModel[0];
+        }
+    }
+    
+    function addCommonVars(vars, sam) {
+        sam = sam || getSAM() || {};
+        var guestAffiliations = Array.isArray(sam.guestAffiliations) ? sam.guestAffiliations.join(',') : sam.guestAffiliations;
+        return _set(vars, {
+            id: getSWID(),
+            guestAffiliation: guestAffiliations,
+            pageKey: $('meta[name=pageKey]').attr('content')
+        });
+    }
+    
+    function getPageType(sam) {
+        sam = sam || getSAM() || {};
+        if (
+            strContains(sam.events, 'purchase') ||
+            sam.pageId === 'confirmsuccess'
+        ) {
+            return CONVERSION;
+        } else if (
+            strContains(sam.siteSection, '/cart/') ||
+            strContains(sam.events, 'cart') ||
+            ref('carts.0.id', sam) ||
+            strContains(ref('products.0.events', sam), 'cart')
+        ) {
+            return CART;
+        } else if (sam.bookingSearchArrivalDate) {
+            return SEARCH;
+        }
+        return VISITOR;
+    }
+    
+    function getSWID() {
+        return ref('PEP.guestLocators.swid') ||
+            ref('WDPRO.Analytics.Framework.analyticsModel.0.customerId') ||
+            cookie.get('SWID') ||
+            cookie.getObject('stateManager_jar', 'swid') ||
+            cookie.getObject('rememberme', 'swid');
+    }
+    
+    function getFinderFacets() {
+        if (ref('PEP.Finder')) {
+            return ((location.hash || '').match(/^#\/(.+?)\/?$/) || [])[1];
+        }
+    }
+    
+    function splitCategoryFacets(facetStr) {
+        var facets = {},
+            facetArr,
+            propName;
+    
+        if (facetStr) {
+            facetArr = facetStr.split(',');
+            facetArr.forEach(function (facet) {
+                propName = resortCategories.indexOf(facet) > -1 ? 'category' : 'other';
+                (facets[propName] = facets[propName] || []).push(facet);
+            });
+            if (facets.category) {
+                facets.category = facets.category.join(',');
+            }
+            if (facets.other) {
+                facets.other = facets.other.join(',');
+            }
+        }
+        return facets;
+    }
+    
+    function dateFormat(date, fmt) {
+        var moment = ref('WDPRO.Analytics.moment');
+        if (date && moment && (date = moment(date)).isValid()) {
+            return date.format(fmt);
+        }
+    }
+    
+    function getResort(pkg, product, sam) {
+        var facilityIds = [],
+            resort;
+    
+        if (pkg && pkg.facilityId) {
+            return resorts[pkg.facilityId];
+        }
+    
+        if (product && product.facilityId) {
+            return resorts[product.facilityId];
+        }
+    
+        if (Array.isArray(sam.productsDisplayed)) {
+            facilityIds = sam.productsDisplayed.map(function (product) {
+                return product.facilityId;
+            }).filter(truthy);
+        }
+        if (
+            facilityIds.length > 0 &&
+            facilityIds.every(function (id, i, arr) {
+                return id === arr[0];
+            })
+        ) {
+            resort = resorts[facilityIds[0]];
+        }
+        return resort;
+    
+        function truthy(v) {
+            return v;
+        }
+    }
+    
+    function getVacationPackage(sam) {
+        var package;
+        if (Array.isArray(sam.products)) {
+            sam.products.forEach(function (product) {
+                if (
+                    !package &&
+                    product.productType === 'resortVacation' &&
+                    !strContains(product.events, 'cartRemove')
+                ) {
+                    package = product;
+                }
+            });
+        }
+        return package;
+    }
+    
+    function getBookingSearch(type, data) {
+        var response,
+            paths = [
+                'pkg.booked' + type,
+                'pkg.bookingSearch' + type,
+                'sam.bookingSearch' + type,
+                'sam.totalBooked' + type
+            ];
+        paths.forEach(function (path) {
+            if (response === undefined) {
+                response = ref(path, data);
+            }
+        });
+        return response;
+    }
+    
+    function visitorTag(vars, sam) {
+        var facets = splitCategoryFacets(getFinderFacets(sam));
+    
+        _set(vars, {
+            contentLang: ref('configuration.contentLanguage', sam),
+            contentLocale: ref('configuration.contentLocale', sam),
+            SiteSection: sam.siteSection,
+            pageID: sam.pageId,
+            facet: facets.other,
+            FacilityCategories: facets.category
+        });
+    
+        fireBKTag(vars, VISITOR);
+    }
+    
+    function searchTag(vars, sam) {
+        var facets = splitCategoryFacets(getFinderFacets(sam)),
+            pkg = getVacationPackage(sam),
+            product = ref('products.0', sam),
+            resort = getResort(pkg, product, sam),
+            data = {resort: resort, product: product, pkg: pkg, sam: sam};
+    
+        _set(vars, {
+            bookingSearchAdults: +getBookingSearch('Adults', data),
+            bookingSearchKids: +getBookingSearch('Children', data) + +getBookingSearch('Infants', data),
+            bookingSearchChildrenAges: (getBookingSearch('ChildrenAges', data) || []).join(',') || undefined,
+            ProductID: ref('pkg.productId', data) || ref('product.productId', data),
+            ProductType: ref('pkg.productType', data) || ref('product.productType', data),
+            bookingSearchArrivalDate: dateFormat(getBookingSearch('ArrivalDate', data), 'YYYY-MM-DD'),
+            bookingSearchLengthOfStayNights: +getBookingSearch('LengthOfStayNights', data),
+            FacililtyName: ref('resort.name', data),
+            FacilityCategories: ref('resort.category', data) || facets.category,
+            packageType: ref('pkg.packageType', data),
+            facet: facets.other
+        });
+    
+        fireBKTag(vars, SEARCH);
+    }
+    
+    function cartTag(vars, sam) {
+        var facets = splitCategoryFacets(getFinderFacets(sam)),
+            pkg = getVacationPackage(sam),
+            product = ref('products.0', sam),
+            resort = getResort(pkg, product, sam),
+            data = {resort: resort, product: product, pkg: pkg, sam: sam};
+    
+        _set(vars, {
+            ProductID: multiRef('productId', sam.products, '/'), //ref('pkg.productId', data) || ref('product.productId', data),
+            ProductType: multiRef('productType', sam.products, '/'), //ref('pkg.productType', data) || ref('product.productType', data),
+            days: multiRef('days', sam.products, '/'), //ref('product.days', data),
+            name: multiRef('name', sam.products, '/'), //ref('product.name', data),
+            parks: multiRef('venues', sam.products, '/'),
+            FacililtyName: ref('resort.name', data),
+            FacilityCategories: ref('resort.category', data) || facets.category,
+            packageType: ref('pkg.packageType', data),
+            facet: facets.other,
+            bookingSearchAdults: +getBookingSearch('Adults', data),
+            bookingSearchKids: +getBookingSearch('Children', data) + +getBookingSearch('Infants', data),
+            bookingSearchChildrenAges: (getBookingSearch('ChildrenAges', data) || []).join(',') || undefined,
+            bookingSearchArrivalDate: dateFormat(getBookingSearch('ArrivalDate', data), 'YYYY-MM-DD'),
+            bookingSearchLengthOfStayNights: +getBookingSearch('LengthOfStayNights', data)
+        });
+    
+        fireBKTag(vars, CART);
+        watchCartUpdate();
+    }
+    
+    function watchCartUpdate() {
+        $(document).on('cartItemUpdate', function (e, model) {
+            if(ref('trackingModel.carts.0.status', model) === 'empty') {
+                fireBKTag({cart: 'empty'}, CART);
+            }
+        });
+    }
+    
+    function conversionTag(vars, sam) {
+        var facets = splitCategoryFacets(getFinderFacets(sam)),
+            pkg = getVacationPackage(sam),
+            product = ref('products.0', sam),
+            resort = getResort(pkg, product, sam),
+            data = {resort: resort, product: product, pkg: pkg, sam: sam};
+    
+        _set(vars, {
+            ProductID: multiRef('productId', sam.products, '/'), //ref('pkg.productId', data) || ref('product.productId', data),
+            ProductType: multiRef('productType', sam.products, '/'), //ref('pkg.productType', data) || ref('product.productType', data),
+            days: multiRef('days', sam.products, '/'), //ref('product.days', data),
+            name: multiRef('name', sam.products, '/'), //ref('product.name', data),
+            parks: multiRef('venues', sam.products, '/'),
+            FacililtyName: ref('resort.name', data),
+            FacilityCategories: ref('resort.category', data) || facets.category,
+            packageType: ref('pkg.packageType', data),
+            facet: facets.other,
+            bookingSearchAdults: +getBookingSearch('Adults', data),
+            bookingSearchKids: +getBookingSearch('Children', data) + +getBookingSearch('Infants', data),
+            bookingSearchChildrenAges: (getBookingSearch('ChildrenAges', data) || []).join(',') || undefined,
+            bookingSearchArrivalDate: dateFormat(getBookingSearch('ArrivalDate', data), 'YYYY-MM-DD'),
+            bookingSearchLengthOfStayNights: +getBookingSearch('LengthOfStayNights', data)
+        });
+        fireBKTag(vars, CONVERSION);
+    }
+    
+    function preFireBKTag() {
+        bkQueue.push(arguments);
+    }
+    
+    function postFireBKTag(vars, tagType) {
+        objForEach(vars, function (val, key) {
+            window.bk_addPageCtx(key, val);
+        });
+        window.bk_allow_multiple_calls = true;
+        window.bk_use_multiple_iframes = true;
+        window.bk_doJSTag(
+            tagIdMap[(lastTagType = tagType || lastTagType)],
+            10
+        );
+    }
+    
+    function multiRef(path, base, enclose) {
+        var value = [];
+    
+        if (Array.isArray(base)) base.forEach(function (b) {
+            value.push(ref(path, b));
+        });
+    
+        if (enclose) value = value.map(function (v) {
+            return enclose + v + enclose;
+        });
+    
+        return value.length > 0 ? value.join(',') : undefined;
+    }
+    
+    function ref(path, base) {
+        var i = path.indexOf('.');
+        base = base || this;
+        return (i === -1) ? base[path] : (base = base[path.substr(0, i)]) && ref(path.substr(i + 1), base);
+    }
+    
+    function strContains(str, key) {
+        if (typeof str === 'string') {
+            return str.indexOf(key) > -1;
+        }
+    }
+    
+    function isNotNaN(val) {
+        return val === val;
+    }
+    
+    function objForEach(r,n,o){var t;for(t in r)r.hasOwnProperty(t)&&n.call(o,r[t],t,r)} // eslint-disable-line
+    
+    function obj(){for(var o={},a=arguments,i=0,n=a.length;n>i;)o[a[i++]]=a[i++];return o} // eslint-disable-line
+    
+    function _set(targetObj, key, val) {
+        var srcObj = key;
+        if (typeof key === 'string') (srcObj = {})[key] = val;
+        
+        objForEach(srcObj, function (val, key) {
+            if (typeof val !== 'undefined' && isNotNaN(val)) {
+                targetObj[key] = val;
+            }
+        });
+        return targetObj;
+    }
+    
+    function cookieUtil() {
+        var cookies = {},
+            cookieString = '';
+    
+        return {
+            getObject: cookieGetObject,
+            getAll: cookiesGetAll,
+            get: cookieGet
+        };
+    
+        function cookieGetObject(name, key) {
+            var obj = _parse(cookieGet(name));
+            if (key) {
+                obj = obj && typeof obj === 'object' && !Array.isArray(obj) ? ref(key, obj) : undefined;
+            }
+            return obj;
+        }
+    
+        function cookieGet(key) {
+            return cookiesGetAll()[key];
+        }
+    
+        function cookiesGetAll() {
+            var newCookieStr = document.cookie,
+                cookieArr,
+                i,
+                cookie,
+                index,
+                cookieName;
+    
+            if (newCookieStr !== cookieString) {
+                cookieString = newCookieStr;
+                cookies = {};
+    
+                cookieArr = cookieString.split('; ');
+                for (i = 0; i < cookieArr.length; i++) {
+                    cookie = cookieArr[i];
+                    index = cookie.indexOf('=');
+                    if (index > 0) {
+                        cookieName = _decode(cookie.substring(0, index));
+                        if (!(cookieName in cookies)) {
+                            cookies[cookieName] = _decode(cookie.substring(index + 1));
+                        }
+                    }
+                }
+            }
+            return cookies;
+        }
+    
+        function _decode(str) {
+            try {
+                str = decodeURIComponent(str);
+            } catch (ignore) {
+                // str is not decodable using decodeURIComponent
+            }
+            return str;
+        }
+    
+        function _parse(str) {
+            try {
+                str = JSON.parse(str);
+            } catch (ignore) {
+                // str is not parsable
+            }
+            return str;
+        }
+    }
+    
+    function once(fn) {
+        var called = false;
+        return proxy;
+    
+        function proxy() {
+            if (!called) {
+                called = true;
+                return fn.apply(this, arguments);
+            }
+        }
+    }
+    
+    });</script><script>_satellite["_runScript4"](function(event, target, Promise) {
+    var prevPageName = '';
+    setInterval(function() {
+      if (prevPageName != _satellite.getVar('s_pageName')) {
+        prevPageName = _satellite.getVar('s_pageName');
+        if (!(/cart\/consumer\/checkoutlink$/.test(prevPageName))) {
+          var myCustomEvent = new CustomEvent('dataLayerReady', {detail:{}});
+          document.querySelector('body').dispatchEvent(myCustomEvent);
+          }
+      }
+    }, 500);
+    });</script><script src="//analytics.disney.go.com/analytics/framework/dlr/stable/framework-top.min.js" data-injected-by="go4"></script>
+        <!-- Webcomponent Polyfills -->
+        <script src="assets/webcomponentsjs/custom-elements-es5-adapter.js" charset="utf-8"></script>
+        <script src="assets/webcomponentsjs/webcomponents-lite.js" charset="utf-8"></script>
+    
+        <!-- Polymer webcomponents -->
+        <link rel="import" href="assets/webcomponents/es5/src/web_components.html">
+    <link rel="stylesheet" href="styles.44f2c0d1a8ef886cadc2.css">
+    <script>(window.BOOMR_mq=window.BOOMR_mq||[]).push(["addVar",{"rua.upush":"false","rua.cpush":"false","rua.upre":"false","rua.cpre":"false","rua.uprl":"false","rua.cprl":"false","rua.cprf":"false","rua.trans":"","rua.cook":"false","rua.ims":"false","rua.ufprl":"false","rua.cfprl":"false","rua.isuxp":"false","rua.texp":"norulematch"}]);</script>
+    <script>!function(){function o(n,i){if(n&&i)for(var r in i)i.hasOwnProperty(r)&&(void 0===n[r]?n[r]=i[r]:n[r].constructor===Object&&i[r].constructor===Object?o(n[r],i[r]):n[r]=i[r])}try{var n=decodeURIComponent("%7B%20%22Akamai%22%3A%20%7B%20%22enabled%22%3A%20false%20%7D%20%7D");if(n.length>0&&window.JSON&&"function"==typeof window.JSON.parse){var i=JSON.parse(n);void 0!==window.BOOMR_config?o(window.BOOMR_config,i):window.BOOMR_config=i}}catch(r){window.console&&"function"==typeof window.console.error&&console.error("mPulse: Could not parse configuration",r)}}();</script>
+                                  <script>!function(e){var n="https://s.go-mpulse.net/boomerang/";if("False"=="True")e.BOOMR_config=e.BOOMR_config||{},e.BOOMR_config.PageParams=e.BOOMR_config.PageParams||{},e.BOOMR_config.PageParams.pci=!0,n="https://s2.go-mpulse.net/boomerang/";if(window.BOOMR_API_key="Y9JU3-4WAW3-KDH6K-VNALE-9WN6R",function(){function e(){if(!o){var e=document.createElement("script");e.id="boomr-scr-as",e.src=window.BOOMR.url,e.async=!0,i.parentNode.appendChild(e),o=!0}}function t(e){o=!0;var n,t,a,r,d=document,O=window;if(window.BOOMR.snippetMethod=e?"if":"i",t=function(e,n){var t=d.createElement("script");t.id=n||"boomr-if-as",t.src=window.BOOMR.url,BOOMR_lstart=(new Date).getTime(),e=e||d.body,e.appendChild(t)},!window.addEventListener&&window.attachEvent&&navigator.userAgent.match(/MSIE [67]\./))return window.BOOMR.snippetMethod="s",void t(i.parentNode,"boomr-async");a=document.createElement("IFRAME"),a.src="about:blank",a.title="",a.role="presentation",a.loading="eager",r=(a.frameElement||a).style,r.width=0,r.height=0,r.border=0,r.display="none",i.parentNode.appendChild(a);try{O=a.contentWindow,d=O.document.open()}catch(_){n=document.domain,a.src="javascript:var d=document.open();d.domain='"+n+"';void(0);",O=a.contentWindow,d=O.document.open()}if(n)d._boomrl=function(){this.domain=n,t()},d.write("<bo"+"dy onload='document._boomrl();'>");else if(O._boomrl=function(){t()},O.addEventListener)O.addEventListener("load",O._boomrl,!1);else if(O.attachEvent)O.attachEvent("onload",O._boomrl);d.close()}function a(e){window.BOOMR_onload=e&&e.timeStamp||(new Date).getTime()}if(!window.BOOMR||!window.BOOMR.version&&!window.BOOMR.snippetExecuted){window.BOOMR=window.BOOMR||{},window.BOOMR.snippetStart=(new Date).getTime(),window.BOOMR.snippetExecuted=!0,window.BOOMR.snippetVersion=12,window.BOOMR.url=n+"Y9JU3-4WAW3-KDH6K-VNALE-9WN6R";var i=document.currentScript||document.getElementsByTagName("script")[0],o=!1,r=document.createElement("link");if(r.relList&&"function"==typeof r.relList.supports&&r.relList.supports("preload")&&"as"in r)window.BOOMR.snippetMethod="p",r.href=window.BOOMR.url,r.rel="preload",r.as="script",r.addEventListener("load",e),r.addEventListener("error",function(){t(!0)}),setTimeout(function(){if(!o)t(!0)},3e3),BOOMR_lstart=(new Date).getTime(),i.parentNode.appendChild(r);else t(!1);if(window.addEventListener)window.addEventListener("load",a,!1);else if(window.attachEvent)window.attachEvent("onload",a)}}(),"".length>0)if(e&&"performance"in e&&e.performance&&"function"==typeof e.performance.setResourceTimingBufferSize)e.performance.setResourceTimingBufferSize();!function(){if(BOOMR=e.BOOMR||{},BOOMR.plugins=BOOMR.plugins||{},!BOOMR.plugins.AK){var n=""=="true"?1:0,t="",a="vhtszo5ykvhscy4igqua-f-cb002e725-clientnsv4-s.akamaihd.net",i="false"=="true"?2:1,o={"ak.v":"33","ak.cp":"466676","ak.ai":parseInt("341383",10),"ak.ol":"0","ak.cr":6,"ak.ipv":4,"ak.proto":"h2","ak.rid":"1284f34a","ak.r":35636,"ak.a2":n,"ak.m":"e12","ak.n":"essl","ak.bpcip":"169.231.44.0","ak.cport":52773,"ak.gh":"172.232.11.71","ak.quicv":"","ak.tlsv":"tls1.3","ak.0rtt":"","ak.csrc":"-","ak.acc":"","ak.t":"1669870632","ak.ak":"hOBiQwZUYzCg5VSAfCLimQ==eAg7iq8FW9kyHrNws8cJyT6V4yugrHwscmulWuLSWzRvpEtKBT4Dm+G6qZE5dHSGny6Jf8JoPz/vCucej8dV+lHXzoQau3Lbg3IB8/wtl6bZkxLsgopMJhtCie/FfVl2ffWk/2fC7kQhtsQwdeo37THMxO5shZzzJu8bQhgu6TB835Xb82Vq5C+0gu3Jf9vM1/XP+/KtxgfB6DwU/5lVbdD+Ej5WQZw5OMt62L6Sf2xIZiTVuwV3HvLhq3bmv98wR7rfXT4yBfq5Fnj4mGK+UG9b7UpskeAh6dCnDgYHfENYeuS43U/iLQZHCkWvhlCaJz6IX5sG3/yBYDxl1+TLLCLuZ2tH5NdpbEOz5ZvUqUSQt/WV1QjSU2s7GSSCt/Lgv9xthE0zo6XO4wUFVpKeaMoTl7PGNmgJHr74/5Crk+M=","ak.pv":"604","ak.dpoabenc":"","ak.tf":i};if(""!==t)o["ak.ruds"]=t;var r={i:!1,av:function(n){var t="http.initiator";if(n&&(!n[t]||"spa_hard"===n[t]))o["ak.feo"]=void 0!==e.aFeoApplied?1:0,BOOMR.addVar(o)},rv:function(){var e=["ak.bpcip","ak.cport","ak.cr","ak.csrc","ak.gh","ak.ipv","ak.m","ak.n","ak.ol","ak.proto","ak.quicv","ak.tlsv","ak.0rtt","ak.r","ak.acc","ak.t","ak.tf"];BOOMR.removeVar(e)}};BOOMR.plugins.AK={akVars:o,akDNSPreFetchDomain:a,init:function(){if(!r.i){var e=BOOMR.subscribe;e("before_beacon",r.av,null,null),e("onbeacon",r.rv,null,null),r.i=!0}return this},is_complete:function(){return!0}}}}()}(window);</script><link href="https://s.go-mpulse.net/boomerang/Y9JU3-4WAW3-KDH6K-VNALE-9WN6R" rel="preload" as="script"><script src="https://assets.adobedtm.com/1b439b897261/cf8988e8df92/0d683f4a8b4b/RCabe691c45b0b4caf9a48b05404193503-source.min.js" async=""></script><script src="https://assets.adobedtm.com/1b439b897261/cf8988e8df92/0d683f4a8b4b/RC2999d69acbf54a71a9089c72d231dcb1-source.min.js" async=""></script><script id="boomr-scr-as" src="https://s.go-mpulse.net/boomerang/Y9JU3-4WAW3-KDH6K-VNALE-9WN6R" async=""></script><script type="text/javascript" async="" src="//go4.disney.go.com/cnsq/dlr.js"></script><meta http-equiv="origin-trial" content="A751Xsk4ZW3DVQ8WZng2Dk5s3YzAyqncTzgv+VaE6wavgTY0QHkDvUTET1o7HanhuJO8lgv1Vvc88Ij78W1FIAAAAAB7eyJvcmlnaW4iOiJodHRwczovL3d3dy5nb29nbGV0YWdtYW5hZ2VyLmNvbTo0NDMiLCJmZWF0dXJlIjoiUHJpdmFjeVNhbmRib3hBZHNBUElzIiwiZXhwaXJ5IjoxNjgwNjUyNzk5LCJpc1RoaXJkUGFydHkiOnRydWV9"><meta http-equiv="origin-trial" content="A751Xsk4ZW3DVQ8WZng2Dk5s3YzAyqncTzgv+VaE6wavgTY0QHkDvUTET1o7HanhuJO8lgv1Vvc88Ij78W1FIAAAAAB7eyJvcmlnaW4iOiJodHRwczovL3d3dy5nb29nbGV0YWdtYW5hZ2VyLmNvbTo0NDMiLCJmZWF0dXJlIjoiUHJpdmFjeVNhbmRib3hBZHNBUElzIiwiZXhwaXJ5IjoxNjgwNjUyNzk5LCJpc1RoaXJkUGFydHkiOnRydWV9"><script type="text/javascript" async="" src="https://googleads.g.doubleclick.net/pagead/viewthroughconversion/1070398022/?random=1669870633576&amp;cv=11&amp;fst=1669870633576&amp;bg=ffffff&amp;guid=ON&amp;async=1&amp;gtm=2oabs0&amp;u_w=1728&amp;u_h=1117&amp;hn=www.googleadservices.com&amp;frm=0&amp;url=https%3A%2F%2Fdisneyland.disney.go.com%2Favailability-calendar%2F&amp;ref=https%3A%2F%2Fwww.google.com%2F&amp;tiba=Theme%20Park%20Reservation%20Availability&amp;auid=1889988477.1669870585&amp;uaa=arm&amp;uab=64&amp;uafvl=Google%2520Chrome%3B107.0.5304.110%7CChromium%3B107.0.5304.110%7CNot%253DA%253FBrand%3B24.0.0.0&amp;uap=macOS&amp;uapv=12.5.0&amp;uaw=0&amp;data=event%3Dgtag.config&amp;rfmt=3&amp;fmt=4"></script><style>@media (max-width:767px){[_nghost-lle-c0]   #container[_ngcontent-lle-c0]{margin:10px 16px 0}}@media (min-width:768px){[_nghost-lle-c0]   #container[_ngcontent-lle-c0]{margin:10px 40px 0}}@media (min-width:1024px){[_nghost-lle-c0]   #container[_ngcontent-lle-c0]{margin:40px 60px 0;max-width:984px}}@media (min-width:1200px){[_nghost-lle-c0]   #container[_ngcontent-lle-c0]{margin:40px auto 0;max-width:1100px}}</style><meta name="description" content="To enter one of the parks, in addition to valid admission, each Guest is required to make a theme park reservation via the Disney Park Pass system."><meta name="keywords" content="Disney Park Pass Availability, theme park reservation, theme park reservations, Disney Park Pass, Park Pass, Reservations, park reservations, park reservation, disnleyland Park Pass, california adventure Park Pass, pixar pier Park Pass, disnleyland reservations, california adventure reservations, pixar pier reservations, disnleyland reservation, reservation availability, reservations availability, reservation availability, park pass availability"><style></style><style>[_nghost-lle-c2]   .general-error[_ngcontent-lle-c2]{font-family:var(--font-family-black);color:var(--alert-orange)}[_nghost-lle-c2]   .general-error[_ngcontent-lle-c2]   .di[_ngcontent-lle-c2]{position:relative;top:2px;margin-right:5px}</style><style>[hidden] { display: none !important; }</style><script src="https://assets.adobedtm.com/1b439b897261/cf8988e8df92/0d683f4a8b4b/RCecee2a2faf2c4926bd00d8b785fdddb6-source.min.js" async=""></script><script src="https://sb.scorecardresearch.com/beacon.js"></script><script src="https://connect.facebook.net/signals/config/397422390408189?v=2.9.89&amp;r=stable" async=""></script><script src="//connect.facebook.net/en_US/fbevents.js"></script><script src="https://assets.adobedtm.com/1b439b897261/cf8988e8df92/0d683f4a8b4b/RC77e28bcd16164d4584bc9913bcc69c5b-source.min.js" async=""></script><script src="https://assets.adobedtm.com/1b439b897261/cf8988e8df92/0d683f4a8b4b/RC150861be89234d31844d2d049bbb641e-source.min.js" async=""></script><script src="https://assets.adobedtm.com/1b439b897261/cf8988e8df92/0d683f4a8b4b/RC4038442693cc4661809f3f7f3a2a067c-source.min.js" async=""></script><script src="https://assets.adobedtm.com/1b439b897261/cf8988e8df92/0d683f4a8b4b/RCbd8f130240a84b6894a6a0d02b3356a6-source.min.js" async=""></script><script src="https://assets.adobedtm.com/1b439b897261/cf8988e8df92/0d683f4a8b4b/RCff64e191130f4de8ba3dce1bbfef7910-source.min.js" async=""></script><script src="https://assets.adobedtm.com/1b439b897261/cf8988e8df92/0d683f4a8b4b/RCd77fe052f82d410e834be3ff51b7c58d-source.min.js" async=""></script><script src="https://assets.adobedtm.com/1b439b897261/cf8988e8df92/0d683f4a8b4b/RC34546cde59224f4eb1306b515a76ceea-source.min.js" async=""></script><script src="https://assets.adobedtm.com/1b439b897261/cf8988e8df92/0d683f4a8b4b/RC1349d2e3c3a048b0b337d5851b51ebb3-source.min.js" async=""></script><script src="https://assets.adobedtm.com/1b439b897261/cf8988e8df92/0d683f4a8b4b/RC8d707214c4064878891dc178666fba34-source.min.js" async=""></script><script src="https://assets.adobedtm.com/1b439b897261/cf8988e8df92/0d683f4a8b4b/RCab354f9aa41b45028868a4d25af8c904-source.min.js" async=""></script><script src="https://assets.adobedtm.com/1b439b897261/cf8988e8df92/0d683f4a8b4b/RC670bde149aa14497a3d31d28ea3c9ef4-source.min.js" async=""></script><style type="text/css">.ywa-10000 { position: absolute; height: 1px; width: 1px; color: white; }</style><script type="text/javascript" async="" src="https://www.googleadservices.com/pagead/conversion/1070398022/?random=1669870635152&amp;cv=11&amp;fst=1669870635152&amp;bg=ffffff&amp;guid=ON&amp;async=1&amp;gtm=2oabs0&amp;u_w=1728&amp;u_h=1117&amp;label=71WFCMKNnOgCEMb0s_4D&amp;hn=www.googleadservices.com&amp;frm=0&amp;url=https%3A%2F%2Fdisneyland.disney.go.com%2Favailability-calendar%2F&amp;ref=https%3A%2F%2Fwww.google.com%2F&amp;tiba=Theme%20Park%20Reservation%20Availability&amp;gtm_ee=1&amp;gclaw=Cj0KCQiAm5ycBhCXARIsAPldzoVU3B63Vt1xTay8QNdGXeENveC-9XWDKiiViyrJlmJLdeiFa8ROussaAoUJEALw_wcB&amp;gac=UA-99867646-1%3ACj0KCQiAm5ycBhCXARIsAPldzoVU3B63Vt1xTay8QNdGXeENveC-9XWDKiiViyrJlmJLdeiFa8ROussaAoUJEALw_wcB&amp;auid=1889988477.1669870585&amp;uaa=arm&amp;uab=64&amp;uafvl=Google%2520Chrome%3B107.0.5304.110%7CChromium%3B107.0.5304.110%7CNot%253DA%253FBrand%3B24.0.0.0&amp;uap=macOS&amp;uapv=12.5.0&amp;uaw=0&amp;data=event%3Dconversion&amp;rfmt=3&amp;fmt=4"></script><script src="https://bat.bing.com/p/action/22005682.js" type="text/javascript" async="" data-ueto="ueto_a87b84c5bd"></script><meta http-equiv="origin-trial" content="A751Xsk4ZW3DVQ8WZng2Dk5s3YzAyqncTzgv+VaE6wavgTY0QHkDvUTET1o7HanhuJO8lgv1Vvc88Ij78W1FIAAAAAB7eyJvcmlnaW4iOiJodHRwczovL3d3dy5nb29nbGV0YWdtYW5hZ2VyLmNvbTo0NDMiLCJmZWF0dXJlIjoiUHJpdmFjeVNhbmRib3hBZHNBUElzIiwiZXhwaXJ5IjoxNjgwNjUyNzk5LCJpc1RoaXJkUGFydHkiOnRydWV9"><meta http-equiv="origin-trial" content="A751Xsk4ZW3DVQ8WZng2Dk5s3YzAyqncTzgv+VaE6wavgTY0QHkDvUTET1o7HanhuJO8lgv1Vvc88Ij78W1FIAAAAAB7eyJvcmlnaW4iOiJodHRwczovL3d3dy5nb29nbGV0YWdtYW5hZ2VyLmNvbTo0NDMiLCJmZWF0dXJlIjoiUHJpdmFjeVNhbmRib3hBZHNBUElzIiwiZXhwaXJ5IjoxNjgwNjUyNzk5LCJpc1RoaXJkUGFydHkiOnRydWV9"><meta http-equiv="origin-trial" content="A751Xsk4ZW3DVQ8WZng2Dk5s3YzAyqncTzgv+VaE6wavgTY0QHkDvUTET1o7HanhuJO8lgv1Vvc88Ij78W1FIAAAAAB7eyJvcmlnaW4iOiJodHRwczovL3d3dy5nb29nbGV0YWdtYW5hZ2VyLmNvbTo0NDMiLCJmZWF0dXJlIjoiUHJpdmFjeVNhbmRib3hBZHNBUElzIiwiZXhwaXJ5IjoxNjgwNjUyNzk5LCJpc1RoaXJkUGFydHkiOnRydWV9"><meta http-equiv="origin-trial" content="A751Xsk4ZW3DVQ8WZng2Dk5s3YzAyqncTzgv+VaE6wavgTY0QHkDvUTET1o7HanhuJO8lgv1Vvc88Ij78W1FIAAAAAB7eyJvcmlnaW4iOiJodHRwczovL3d3dy5nb29nbGV0YWdtYW5hZ2VyLmNvbTo0NDMiLCJmZWF0dXJlIjoiUHJpdmFjeVNhbmRib3hBZHNBUElzIiwiZXhwaXJ5IjoxNjgwNjUyNzk5LCJpc1RoaXJkUGFydHkiOnRydWV9"><script type="text/javascript" async="" src="//js.adsrvr.org/up_loader.1.1.0.js"></script><script type="text/javascript" async="" src="//tpc.googlesyndication.com/sodar/1s9mPOHO.js"></script></head>
+    <body>
+    <app-root _nghost-lle-c0="" ng-version="8.0.3"><div _ngcontent-lle-c0="" id="container"><app-availability-selector _ngcontent-lle-c0="" _nghost-lle-c1=""><awakening-selector _ngcontent-lle-c1="" title="Theme Park Reservation Availability" adaptive="lg"></awakening-selector></app-availability-selector><app-availability-calendar _ngcontent-lle-c0="" _nghost-lle-c2=""><!----><awakening-calendar _ngcontent-lle-c2="" adaptive="lg"></awakening-calendar><awakening-availability-information _ngcontent-lle-c2="" title="Parks with Available Reservations on <span class='selectedDate'></span>" adaptive="lg"></awakening-availability-information></app-availability-calendar></div></app-root>
+    <script src="runtime.741402d1d47331ce975c.js"></script><script src="polyfills-es5.62cf532aa5b429188256.js" nomodule=""></script><script src="polyfills.f8c7d631779787e62ce7.js"></script><script src="main.9766cd02eeed7a93ecb9.js"></script><script type="text/javascript" src="/xUMub/laB/0Qpr/AI/5fesUx/p15LwhSJ/bgcJeAMB/SCh4fgdj/TCEB"></script>
+    <iframe name="__bkframe" height="0" width="0" frameborder="0" style="display:none;position:absolute;clip:rect(0px 0px 0px 0px)" src="about:blank"></iframe><script src="https://tags.bkrtx.com/js/bk-coretag.js"></script><script>_satellite["_runScript5"](function(event, target, Promise) {
+    _satellite.getVar('waitFor')({
+        location: [
+            'WDPRO.Analytics.wdwQuery',
+            function () {
+                return document.querySelector('.gnbParksAndTickets,.gnbCategory.parks-and-tickets');
+            }
+        ],
+        callback: function ($) {
+            hov('ParksAndTickets', 'parks-and-tickets', 'ParksTickets');
+            hov('PlacesToStay', 'places-to-stay', 'PlacesToStay');
+            hov('ThingsToDo', 'things-to-do', 'ThingsToDo');
+            hov('Help', 'help', 'Help');
+            hov('AnnualPassholders', 'annual-passports', 'AnnualPassports');
+    
+            function hov(mainGnbClass, childClass, linkId) {
+                var timer,
+                    $el = $('.gnb' + mainGnbClass + ',.gnbCategory.' + childClass);
+    
+                if ($el.hasClass(childClass)) $el = $el.parent();
+                $el.hover(
+                    function () {
+                        timer = setTimeout(function () {
+                            s_wdpro.trackClick({}, 'DLR_Header_' + linkId + '_Hover');
+                        }, 1001);
+                    },
+                    function () {
+                        clearTimeout(timer);
+                    }
+                );
+            }
+        }
+    });
+    
+    });</script><script src="//analytics.disney.go.com/analytics/framework/dlr/stable/framework-bottom.min.js" data-injected-by="go4"></script><iframe sandbox="allow-scripts allow-same-origin" title="Adobe ID Syncing iFrame" id="destination_publishing_iframe_wdpro_0" name="destination_publishing_iframe_wdpro_0_name" src="https://wdpro.demdex.net/dest5.html?d_nsid=0#https%3A%2F%2Fdisneyland.disney.go.com%2Favailability-calendar%2F" class="aamIframeLoaded" style="display: none; width: 0px; height: 0px;"></iframe><script>_satellite["_runScript6"](function(event, target, Promise) {
+    _satellite.getVar("waitFor")({location:["visitor.getMarketingCloudVisitorID",function(t){return"function"==typeof t&&t()},function(){return _satellite.getVar("doPixel")}],callback:function(t,e,i){i("https://d.agkn.com/pixel/5437/?che="+Math.random()+"&uid="+e),i("https://www.facebook.com/tr?id=1730216243681426&ev=PageView&cd[order_id]="+e)}});
+    });</script><img width="1" height="1" src="https://d.agkn.com/pixel/5437/?che=0.3150065347973281&amp;uid=71652200023954551521413680766555840016" alt="" data-source="TMS" style="position: absolute; bottom: 0px;"><img width="1" height="1" src="https://www.facebook.com/tr?id=1730216243681426&amp;ev=PageView&amp;cd[order_id]=71652200023954551521413680766555840016" alt="" data-source="TMS" style="position: absolute; bottom: 0px;"><script>_satellite["_runScript7"](function(event, target, Promise) {
+    const isProd="production"===_satellite.environment.stage,envPrefix=isProd?"":window.location.hostname.includes("latest")?"latest.":"stage.";_satellite.getVar("loadScript")(`//${envPrefix}go4.disney.go.com/cnsq/dlr${isProd?"":"-stage"}.js`);
+    });</script><script>_satellite["_runScript8"](function(event, target, Promise) {
+    window.addEventListener("beforeunload",(function(){s_wdpro.Media.autoTrack=!1}));
+    });</script><img src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/970897162/?value=0&amp;guid=ON&amp;data=site%3DDLR&amp;script=0" width="1" height="1" alt="" style="position:absolute;bottom:0;" data-source="JSAF"><iframe name="__bkframe_27177_1669870634765" id="__bkframe_27177_1669870634765" title="bk" src="https://stags.bluekai.com/site/27177?ret=html&amp;phint=id%3D%7B0D15A6A8-2FA2-4111-8AF1-68D2B71BD36F%7D&amp;phint=SiteSection%3Dtools%2Fadmissioncalendar&amp;phint=pageID%3Davailability&amp;phint=__bk_t%3DTheme%20Park%20Reservation%20Availability&amp;phint=__bk_k%3DDisney%20Park%20Pass%20Availability%2C%20theme%20park%20reservation%2C%20theme%20park%20reservations%2C%20Disney%20Park%20Pass%2C%20Park%20Pass%2C%20Reservations%2C%20park%20reservations%2C%20park%20reservation%2C%20disnleyland%20Park%20Pass%2C%20california%20adventure%20Park%20Pass%2C%20pixar%20pier%20Park%20Pass%2C%20disnleyland%20reservations%2C%20california%20adventure%20reservations%2C%20pixar%20pier%20reservations%2C%20disnleyland%20reservation%2C%20reservation%20availability%2C%20reservations%20availability%2C%20reservation%20availability%2C%20park%20pass%20availability&amp;phint=__bk_pr%3Dhttps%3A%2F%2Fwww.google.com%2F&amp;phint=__bk_l%3Dhttps%3A%2F%2Fdisneyland.disney.go.com%2Favailability-calendar%2F&amp;phint=__bk_v%3D3.1.10&amp;limit=10&amp;r=70129725" class="__bkframe_site_27177" style="border: 0px; width: 0px; height: 0px; display: none; position: absolute; clip: rect(0px, 0px, 0px, 0px);"></iframe><script>_satellite["_runScript9"](function(event, target, Promise) {
+    !function(t,e,a,n,o){var c,i,r;t[o]=t[o]||[],c=function(){var e={ti:"22005682"};e.q=t[o],t[o]=new UET(e),t[o].push("pageLoad")},(i=e.createElement(a)).src=n,i.async=1,i.onload=i.onreadystatechange=function(){var t=this.readyState;t&&"loaded"!==t&&"complete"!==t||(c(),i.onload=i.onreadystatechange=null)},(r=e.getElementsByTagName(a)[0]).parentNode.insertBefore(i,r)}(window,document,"script","//bat.bing.com/bat.js","uetq");try{location.pathname.match("^/checkout/confirmation/?")&&(window.uetq=window.uetq||[],window.uetq.push({gv:_satellite.getVar("subTotal")}))}catch(t){}
+    });</script><script>_satellite["_runScript10"](function(event, target, Promise) {
+    function fireMyTags(e){e.push({projectId:"10000",properties:{pixelId:"21056"}});var t=/(\/checkout\/confirmation\/?|\/checkout-booking\/confirmation\/?)/;location.pathname.match(t)&&e.push({projectId:"10000",properties:{pixelId:"21056",qstrings:{et:"custom",gv:_satellite.getVar("subTotal"),numrooms:"",lengthofstay:_satellite.getVar("lengthStay")||"",packagetype:_satellite.getVar("packageType"),offertype:_satellite.getVar("offerId"),productcode:_satellite.getVar("productId"),producttype:_satellite.getVar("productType"),ticketquant:_satellite.getVar("ticketQuantity")||"",LOB:"DLR"}}})}!function(e,t,a,o,c){var i="s-yimg_com-wi-ytc",r=t.getElementById(i);e.YAHOO&&delete e.YAHOO,r&&r.remove(),e[c]=[].concat(e[c]||[]),(r=t.createElement(a)).id=i,r.src=o,r.async=!0,r.onload=r.onreadystatechange=function(){var t,a=this.readyState,o=e[c];if(!a||"complete"==a||"loaded"==a)try{t=YAHOO.ywa.I13N.fireBeacon,e[c]=[],e[c].push=function(e){t([e])},t(o),fireMyTags(e[c])}catch(e){}};var s=t.getElementsByTagName(a)[0];s.parentNode.insertBefore(r,s);var n=".ywa-10000 { position: absolute; height: 1px; width: 1px; color: white; }",l=t.head||t.getElementsByTagName("head")[0],p=t.createElement("style");l.appendChild(p),p.type="text/css",p.styleSheet?p.styleSheet.cssText=n:p.appendChild(t.createTextNode(n))}(window,document,"script","https://s.yimg.com/wi/ytc.js","dotq");
+    });</script><script>_satellite["_runScript11"](function(event, target, Promise) {
+    try{gtag("event","conversion",{allow_custom_scripts:!0,send_to:"DC-8941785/invmedia/disne001+standard"})}catch(t){return""}
+    });</script><script>_satellite["_runScript12"](function(event, target, Promise) {
+    try{gtag("event","conversion",{send_to:"AW-1070398022/71WFCMKNnOgCEMb0s_4D"})}catch(e){_satellite.logger.error("TMS Global Google Ads error: "+e)}
+    });</script><script>_satellite["_runScript13"](function(event, target, Promise) {
+    !function(e,t,n,i,a,c){e.twq||(i=e.twq=function(){i.exe?i.exe.apply(i,arguments):i.queue.push(arguments)},i.version="1.1",i.queue=[],(a=t.createElement(n)).async=!0,a.src="//static.ads-twitter.com/uwt.js",(c=t.getElementsByTagName(n)[0]).parentNode.insertBefore(a,c))}(window,document,"script"),twq("init","nwe74"),twq("track","PageView");
+    });</script><div style="width:0px; height:0px; display:none; visibility:hidden;" id="batBeacon762078849312"><img style="width:0px; height:0px; display:none; visibility:hidden;" id="batBeacon553275937038" width="0" height="0" alt="" src="https://bat.bing.com/action/0?ti=22005682&amp;Ver=2&amp;mid=6f85a3e1-1868-4a62-a6a3-a1eba72519c9&amp;sid=83813390713411edbd22b93a1c3c821a&amp;vid=838156d0713411ed82c7cdc57b836da4&amp;vids=0&amp;msclkid=N&amp;pi=918639831&amp;lg=en-US&amp;sw=1728&amp;sh=1117&amp;sc=30&amp;tl=Theme%20Park%20Reservation%20Availability&amp;kw=Disney%20Park%20Pass%20Availability,%20theme%20park%20reservation,%20theme%20park%20reservations,%20Disney%20Park%20Pass,%20Park%20Pass,%20Reservations,%20park%20reservations,%20park%20reservation,%20disnleyland%20Park%20Pass,%20california%20adventure%20Park%20Pass,%20pixar%20pier%20Park%20Pass,%20disnleyland%20reservations,%20california%20adventure%20reservations,%20pixar%20pier%20reservations,%20disnleyland%20reservation,%20reservation%20availability,%20reservations%20availability,%20reservation%20availability,%20park%20pass%20availability&amp;p=https%3A%2F%2Fdisneyland.disney.go.com%2Favailability-calendar%2F&amp;r=https%3A%2F%2Fwww.google.com%2F&amp;lt=1392&amp;evt=pageLoad&amp;sv=1&amp;rn=183416"></div><iframe height="0" width="0" style="display: none; visibility: hidden;" src="https://8941785.fls.doubleclick.net/activityi;src=8941785;type=invmedia;cat=disne001;ord=3249426923108;gtm=2odbs0;gclaw=Cj0KCQiAm5ycBhCXARIsAPldzoVU3B63Vt1xTay8QNdGXeENveC-9XWDKiiViyrJlmJLdeiFa8ROussaAoUJEALw_wcB;gac=UA-99867646-1%3ACj0KCQiAm5ycBhCXARIsAPldzoVU3B63Vt1xTay8QNdGXeENveC-9XWDKiiViyrJlmJLdeiFa8ROussaAoUJEALw_wcB;auiddc=1889988477.1669870585;~oref=https%3A%2F%2Fdisneyland.disney.go.com%2Favailability-calendar%2F?"></iframe><img class="ywa-10000" src="https://sp.analytics.yahoo.com/sp.pl?a=10000&amp;d=Thu%2C%2001%20Dec%202022%2004%3A57%3A15%20GMT&amp;n=8&amp;b=Theme%20Park%20Reservation%20Availability&amp;.yp=21056&amp;f=https%3A%2F%2Fdisneyland.disney.go.com%2Favailability-calendar%2F&amp;e=https%3A%2F%2Fwww.google.com%2F&amp;enc=UTF-8&amp;yv=1.13.0&amp;tagmgr=gtm%2Cadobe" alt="dot image pixel" style="display: none;"><img src="https://t.co/i/adsct?bci=3&amp;eci=2&amp;event_id=81cefed4-8e50-4b88-a097-f23b5a783e1e&amp;events=%5B%5B%22pageview%22%2C%7B%7D%5D%5D&amp;integration=advertiser&amp;p_id=Twitter&amp;p_user_id=0&amp;pl_id=ecd14db7-cb6d-496a-bb25-b34d83b73681&amp;tw_document_href=https%3A%2F%2Fdisneyland.disney.go.com%2Favailability-calendar%2F&amp;tw_iframe_status=0&amp;tw_order_quantity=0&amp;tw_sale_amount=0&amp;txn_id=nwe74&amp;type=javascript&amp;version=2.3.29" height="1" width="1" style="display: none;"><img src="https://analytics.twitter.com/i/adsct?bci=3&amp;eci=2&amp;event_id=81cefed4-8e50-4b88-a097-f23b5a783e1e&amp;events=%5B%5B%22pageview%22%2C%7B%7D%5D%5D&amp;integration=advertiser&amp;p_id=Twitter&amp;p_user_id=0&amp;pl_id=ecd14db7-cb6d-496a-bb25-b34d83b73681&amp;tw_document_href=https%3A%2F%2Fdisneyland.disney.go.com%2Favailability-calendar%2F&amp;tw_iframe_status=0&amp;tw_order_quantity=0&amp;tw_sale_amount=0&amp;txn_id=nwe74&amp;type=javascript&amp;version=2.3.29" height="1" width="1" style="display: none;"><script>_satellite["_runScript14"](function(event, target, Promise) {
+    _satellite.getVar("doPixel")("//s.amazon-adsystem.com/iui3?d=forester-did&ex-fargs=%3Fid%3D3d6148db-a607-4b9d-ccb1-fa1f41658c34%26type%3D4%26m%3D1&ex-fch=416613&ex-src=https://disneyland.disney.go.com/allpages-EXCEPT-home-cart-confirmation&ex-hargs=v%3D1.0%3Bc%3D5144872660101%3Bp%3D3D6148DB-A607-4B9D-CCB1-FA1F41658C34");
+    });</script><img width="1" height="1" src="//s.amazon-adsystem.com/iui3?d=forester-did&amp;ex-fargs=%3Fid%3D3d6148db-a607-4b9d-ccb1-fa1f41658c34%26type%3D4%26m%3D1&amp;ex-fch=416613&amp;ex-src=https://disneyland.disney.go.com/allpages-EXCEPT-home-cart-confirmation&amp;ex-hargs=v%3D1.0%3Bc%3D5144872660101%3Bp%3D3D6148DB-A607-4B9D-CCB1-FA1F41658C34" alt="" data-source="TMS" style="position: absolute; bottom: 0px;"><iframe height="0" width="0" style="display: none; visibility: hidden;" src="https://2789293.fls.doubleclick.net/activityi;src=2789293;type=dlrus988;cat=dlrus03z;ord=1;num=483839292846;gtm=2odbs0;gclaw=Cj0KCQiAm5ycBhCXARIsAPldzoVU3B63Vt1xTay8QNdGXeENveC-9XWDKiiViyrJlmJLdeiFa8ROussaAoUJEALw_wcB;gac=UA-99867646-1%3ACj0KCQiAm5ycBhCXARIsAPldzoVU3B63Vt1xTay8QNdGXeENveC-9XWDKiiViyrJlmJLdeiFa8ROussaAoUJEALw_wcB;auiddc=1889988477.1669870585;u1=%7B0D15A6A8-2FA2-4111-8AF1-68D2B71BD36F%7D;u2=Guest;u3=;u19=71652200023954551521413680766555840016;u21=%2Favailability-calendar%2F;u22=disneyland.disney.go.com;u31=en_us;u50=TMS;~oref=https%3A%2F%2Fdisneyland.disney.go.com%2Favailability-calendar%2F?"></iframe><script>_satellite["_runScript15"](function(event, target, Promise) {
+    var uvars=[1,2,3,19,21,22,31,50];_satellite.getVar("doFloodlight")("dlrus988","dlrus03z",uvars);
+    });</script><script>_satellite["_runScript16"](function(event, target, Promise) {
+    _satellite.getVar("doTradeDesk")(["th2un4d"],{td10:_satellite.getVar("hostname"),td8:_satellite.getVar("locale"),td9:_satellite.getVar("pathname")});
+    });</script><script>_satellite["_runScript17"](function(event, target, Promise) {
+    _satellite.getVar("doFlashtalking")("130900","dlr_us_en_All_pages_EXCEPT_Homepage_Cart_Confirmation");
+    });</script><iframe aria-hidden="true" data-source="TMS" src="//servedby.flashtalking.com/container/6988;130900;7886;iframe/?spotName=dlr_us_en_All_pages_EXCEPT_Homepage_Cart_Confirmation&amp;U1={0D15A6A8-2FA2-4111-8AF1-68D2B71BD36F}&amp;U14=%2Favailability-calendar%2F&amp;U15=disneyland.disney.go.com&amp;U17=&amp;U18=71652200023954551521413680766555840016&amp;U27=en_us&amp;cachebuster=249254.2747994346" width="1" frameborder="0" height="1" title="Adobe Launch Managed Tag" style="position: absolute; bottom: 0px;"></iframe><script>_satellite["_runScript18"](function(event, target, Promise) {
+    !function(e,t,n){if(!e.snaptr){var a=e.snaptr=function(){a.handleRequest?a.handleRequest.apply(a,arguments):a.queue.push(arguments)};a.queue=[];var c="script";r=t.createElement(c),r.async=!0,r.src=n;var i=t.getElementsByTagName(c)[0];i.parentNode.insertBefore(r,i)}}(window,document,"//sc-static.net/scevent.min.js"),window.snaptr("init","8cc50fe2-076e-4939-b7e4-16788552bd85"),window.snaptr("track","PAGE_VIEW"),/^(\/checkout\/confirmation\/?)/.test(window.location.pathname)&&window.snaptr("track","PURCHASE",{currency:_satellite.getVar("currency"),price:_satellite.getVar("grandTotal"),transaction_id:_satellite.getVar("orderId")});
+    });</script><script>_satellite["_runScript19"](function(event, target, Promise) {
+    try{!function(){var e=window.resonateAnalytics=window.resonateAnalytics||[];if(!e.initialize)if(e.invoked)window.console&&console.error&&console.error("Resonate snippet included twice.");else{e.invoked=!0,e.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","once","off","on","profile"],e.factory=function(t){return function(){var a=Array.prototype.slice.call(arguments);return a.unshift(t),e.push(a),e}};for(var t=0;t<e.methods.length;t++){var a=e.methods[t];e[a]=e.factory(a)}e.load=function(e){var t=document.createElement("script");t.type="text/javascript",t.async=!0,t.src=("https:"===document.location.protocol?"https://":"http://")+"cdn.resonate.com/analytics.js/v1/"+e+"/analytics.min.js";var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(t,a)},e.SNIPPET_VERSION="1.0.0",e.load(_satellite.getVar("resonate_accountId"))}e.page(_satellite.getVar("resonate_siteSection"));var r=_satellite.getVar("CMP");if(""!=r&&r.length>0&&/^[A-Z]{3}/.test(r)&&e.identify("Session",{Channel:r.match(/^[A-Z]{3}/)[0]}),/^(\/es-us)?(\/cart\/?|\/checkout\/confirm\/?)/.test(window.location.pathname)){var i,n,o,l,s="",c=_satellite.getVar("partyMix").split(":")||"";""!=c&&c.length>0&&((i=c[0])>5&&(i="6+"),(n=c[2].replace("C",""))>2&&(n="3+"));var u=_satellite.getVar("arrivalDate").split("/")||"";""!=u&&u.length>0&&(o=u[0],l=parseInt(u[2])>=2019?u[2]:"");var p=_satellite.getVar("lengthStay");p&&parseInt(p)>6&&(p="7+");var g=_satellite.getVar("subTotal");switch(!0){default:s="";break;case g<700:s="<$700";break;case g>=700&&g<=1400:s="$700-$1400";break;case g>1400:s="$1400+"}var d=_satellite.getVar("productName").split(",").map((function(e){return e.replace(/[^a-z0-9\+\(\)\-\ \.]/gi,"").replace(/ - (January|February|March|April|May|June|July|August|September|October|November|December) [0-9]{1,} [0-9]{1,}/,"")})),h={"# Children":n,"# Nights":p,Affiliation:_satellite.getVar("resonate_guestAffiliations"),"Arrival Month":o,"Arrival Year":l,CMP:r,"Ticket Days":_satellite.getVar("ticketDays"),"Device Type":_satellite.getVar("deviceType"),"Facility Name":decodeURIComponent(_satellite.getVar("facilityName")),"Facility Tier":_satellite.getVar("facilityTier"),"Party Size":i,"Product Name":d.shift(),"Product Type":_satellite.getVar("resonate_productType"),Segment:_satellite.getVar("segment"),"Sub Total":s};if(d.forEach((function(t){e.track("Purchase info",{"Product Name":t})})),/^(\/es-us)?(\/checkout\/confirm\/?)/.test(window.location.pathname)){var f=(new Date).getMonth()+1+"";h["Purchase Month"]="00".substring(0,2-f.length)+f,h["Purchase Year"]=(new Date).getFullYear()+""}e.track("Purchase info",h)}}()}catch(e){console.log("TMS - Resonate pixel error: "+e)}
+    });</script><iframe id="universal_pixel_th2un4d" height="0" width="0" style="display:none;" src="https://insight.adsrvr.org/track/up?adv=peaxuf0&amp;ref=https%3A%2F%2Fdisneyland.disney.go.com%2Favailability-calendar%2F&amp;upid=th2un4d&amp;upv=1.1.0&amp;td10=disneyland.disney.go.com&amp;td8=en_us&amp;td9=/availability-calendar/" title="TTD Universal Pixel"></iframe><iframe id="snap30187" src="https://tr.snapchat.com/cm/i?pid=8cc50fe2-076e-4939-b7e4-16788552bd85&amp;u_scsid=07efe55e-9ecd-4527-a3e7-69e6a286f7d0&amp;u_sclid=4fc1580f-d0fe-4152-9aca-d3f4a492d427" style="display: none; position: absolute; overflow: hidden; width: 1px; height: 1px;"></iframe><iframe src="//tpc.googlesyndication.com/sodar/Beq5YUTp.html" width="0" height="0" style="display: none;"></iframe></body></html>
